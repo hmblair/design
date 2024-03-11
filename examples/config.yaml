@@ -1,0 +1,51 @@
+# config.yaml
+
+model:
+  class_path: lib.training.modules.DenoisingDiffusionModule
+  init_args:
+    model:
+      class_path: model.RibonucleicAcidSE3Transformer
+      init_args:
+        atom_embedding_dim: 26
+        timestep_embedding_dim: 6
+        num_timesteps: 1000
+        hidden_size: 32
+        num_layers: 6
+        num_heads: 8
+        num_atom_types: 5
+
+data:
+  class_path: loading.RibonucleicAcidDataModule
+  init_args:
+    dir : data/rna-solo
+    batch_size: 32
+    threshold: 100
+
+trainer:
+  precision: 16-mixed
+  gradient_clip_val: 1.0
+  max_epochs: 100
+  logger:
+    class_path: pytorch_lightning.loggers.WandbLogger
+    init_args:
+      save_dir: ./logs/
+      log_model: all
+  callbacks:
+    - class_path: pytorch_lightning.callbacks.ModelCheckpoint
+      init_args:
+        filename: best_model
+        mode: min
+        save_top_k: 1
+        save_last: true
+        dirpath: ./checkpoints/
+    - class_path: pytorch_lightning.callbacks.EarlyStopping
+      init_args:
+        monitor: val_loss
+        patience: 10
+        mode: min
+        verbose: true
+
+optimizer:
+  class_path: torch.optim.AdamW
+  init_args:
+    lr: 0.001
