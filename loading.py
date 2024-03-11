@@ -1,12 +1,15 @@
 
 from Bio import PDB
 import numpy as np
-from typing import Optional
+from typing import Optional, Iterable
 from collections.abc import Sequence
 import torch
 from graph import graph_via_threshold
 import os
 from lib.data.datasets import DeepGraphLibraryIterableDataset
+from lib.data.datamodules import BarebonesDataModule
+from torch.utils.data import DataLoader
+
 
 def get_atom_coordinates(
         residue : PDB.Residue,
@@ -133,32 +136,99 @@ def load_graphs_from_pdb(dir : str, threshold : float):
     return graphs
 
 
-import pytorch_lightning as pl
-from torch.utils.data import DataLoader
 
-class RibonucleicAcidDataModule(pl.LightningDataModule):
-    def __init__(self, dir : str, batch_size : int, threshold : float):
-        super().__init__()
-        self.dir = dir
+class RibonucleicAcidDataModule(BarebonesDataModule):
+    """
+    A DataModule for netCDF data, providing functionality for loading, 
+    transforming, and batching the data.
+
+    Parameters:
+    ----------
+
+    """
+    def __init__(
+            self, 
+            batch_size : int,
+            threshold : float,
+            train_dir : Optional[str] = None,
+            val_dir : Optional[str] = None,
+            test_dir : Optional[str] = None,
+            *args, **kwargs,
+            ) -> None:
+        super().__init__(*args, **kwargs)
+
+        # store the arguments
         self.batch_size = batch_size
         self.threshold = threshold
-        self.graphs = None
+        self.directories = {
+            'train' : train_dir,
+            'val' : val_dir,
+            'test' : test_dir,
+            }
+
+        # raise an error if the number of workers is greater than 1
+        if self.num_workers > 1:
+            raise ValueError(
+                'The number of workers cannot exceed 1 for netCDF datasets.' \
+                ' Exactly one is preferable.'
+                )
 
 
-    def setup(self, stage : Optional[str] = None):
-        graphs = load_graphs_from_pdb(self.dir, self.threshold)
-        self.graphs = DeepGraphLibraryIterableDataset(
-            graphs, batch_size=self.batch_size,
-            )
+    def create_datasets(
+            self, 
+            phase: str, 
+            rank: int, 
+            world_size: int,
+            ) -> Iterable:
+        """
+        Create a dataset for the specified phase, if a path to the data is
+        specified.
+        """
+        if self.directories[phase] is not None:
+            # load the graphs from the directory
+            graphs = load_graphs_from_pdb(self.directories[phase], self.threshold)
 
+            # construct the dataset
+            return DeepGraphLibraryIterableDataset(
+                graphs=graphs, 
+                batch_size=self.batch_size,
+                rank=rank,
+                world_size=world_size,
+                )
+    
 
-    def train_dataloader(self):
-        return DataLoader(self.graphs, batch_size=None)
+    def create_dataloaders(self, phase: str) -> DataLoader:
+        """
+        Create a dataloader for the specified phase.
 
+        Parameters:
+        ----------
+        phase (str): 
+            The phase for which to create the dataloaders. Can be one of 
+            'train', 'val', 'test', or 'predict'.
 
-    def val_dataloader(self):
-        return DataLoader(self.graphs, batch_size=None)
+        Returns:
+        -------
+        torch.utils.data.DataLoader: 
+            The dataloader for the specified phase.
+        """        
+        if phase not in ['train', 'validate', 'test', 'predict']:
+            raise ValueError(
+                f'Unknown phase {phase}. Please specify one of "train", "val", "test", or "predict".'
+                )
 
-
-    def test_dataloader(self):
-        return DataLoader(self.graphs, batch_size=None)
+        if self.data[phase] is not None:
+            if phase == 'train':
+                return DataLoader(
+                    dataset = self.data[phase],
+                    num_workers = self.num_workers,
+                    batch_size = (None if self.num_workers <= 1 else self.num_workers),
+                    multiprocessing_context = 'fork' if torch.backends.mps.is_available() and self.num_workers > 0 else None,
+                    )
+            else:
+                return [DataLoader(
+                    dataset = data,
+                    num_workers = self.num_workers,
+                    batch_size = (None if self.num_workers <= 1 else self.num_workers),
+                    multiprocessing_context = 'fork' if torch.backends.mps.is_available() and self.num_workers > 0 else None,
+                ) for data in self.data[phase]]
