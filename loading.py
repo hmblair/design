@@ -148,7 +148,6 @@ class RibonucleicAcidDataModule(BarebonesDataModule):
     """
     def __init__(
             self, 
-            batch_size : int,
             threshold : float,
             train_dir : Optional[str] = None,
             val_dir : Optional[str] = None,
@@ -158,7 +157,6 @@ class RibonucleicAcidDataModule(BarebonesDataModule):
         super().__init__(*args, **kwargs)
 
         # store the arguments
-        self.batch_size = batch_size
         self.threshold = threshold
         self.directories = {
             'train' : train_dir,
