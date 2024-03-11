@@ -150,7 +150,7 @@ class RibonucleicAcidDataModule(BarebonesDataModule):
             self, 
             threshold : float,
             train_dir : Optional[str] = None,
-            val_dir : Optional[str] = None,
+            validate_dir : Optional[str] = None,
             test_dir : Optional[str] = None,
             *args, **kwargs,
             ) -> None:
@@ -160,7 +160,7 @@ class RibonucleicAcidDataModule(BarebonesDataModule):
         self.threshold = threshold
         self.directories = {
             'train' : train_dir,
-            'val' : val_dir,
+            'validate' : validate_dir,
             'test' : test_dir,
             }
 
