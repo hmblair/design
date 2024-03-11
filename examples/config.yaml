@@ -18,6 +18,7 @@ data:
   class_path: loading.RibonucleicAcidDataModule
   init_args:
     train_dir : data/rna-solo
+    validate_dir : data/rna-solo
     batch_size: 32
     threshold: 100
 
