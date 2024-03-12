@@ -177,7 +177,7 @@ def load_point_cloud_from_nc(
     data = [data.sel(atom=i) for i in ix]
 
     # remove the point cloud variable
-    data = [d.drop(d_var) for d in data]
+    data = [d.drop_vars(d_var) for d in data]
 
     # construct the graphs
     graphs = []
@@ -228,7 +228,7 @@ class RibonucleicAcidDataModule(BarebonesDataModule):
             'validate' : validate_dir,
             'test' : test_dir,
             }
-
+        
         # raise an error if the number of workers is greater than 1
         if self.num_workers > 1:
             raise ValueError(
@@ -285,17 +285,8 @@ class RibonucleicAcidDataModule(BarebonesDataModule):
                 )
 
         if self.data[phase] is not None:
-            if phase == 'train':
-                return DataLoader(
-                    dataset = self.data[phase],
-                    num_workers = self.num_workers,
-                    batch_size = (None if self.num_workers <= 1 else self.num_workers),
-                    multiprocessing_context = 'fork' if torch.backends.mps.is_available() and self.num_workers > 0 else None,
-                    )
-            else:
-                return [DataLoader(
-                    dataset = data,
-                    num_workers = self.num_workers,
-                    batch_size = (None if self.num_workers <= 1 else self.num_workers),
-                    multiprocessing_context = 'fork' if torch.backends.mps.is_available() and self.num_workers > 0 else None,
-                ) for data in self.data[phase]]
+            return DataLoader(
+                dataset = self.data[phase],
+                num_workers = self.num_workers,
+                batch_size = (None if self.num_workers <= 1 else self.num_workers),
+                )
