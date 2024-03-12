@@ -139,6 +139,7 @@ def load_graphs_from_pdb(dir : str, threshold : float):
 import dgl
 import torch
 import xarray as xr
+from tqdm.auto import tqdm
 
 def load_point_cloud_from_nc(
         file : str, 
@@ -250,7 +251,7 @@ class RibonucleicAcidDataModule(BarebonesDataModule):
             # load the graphs from the directory
             graphs = load_point_cloud_from_nc(
                 file=self.directories[phase], 
-                d_var='atom', 
+                d_var='graph', 
                 threshold=self.threshold,
                 )
 
