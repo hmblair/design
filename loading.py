@@ -167,7 +167,7 @@ def load_point_cloud_from_nc(
     """
 
     # load the data
-    data = xr.open_dataset(file)
+    data = xr.open_dataset(file, engine='netcdf4')
 
     # get the indices of the unique point clouds
     which = data[d_var].values
