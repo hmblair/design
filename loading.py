@@ -195,6 +195,9 @@ def load_point_cloud_from_nc(
         for col in d.data_vars:
             graph.ndata[col] = torch.tensor(d[col].values)
 
+        # compute the relative position of the nodes
+        graph.edata['rel_pos'] = coordinates[graph.edges()[0]] - coordinates[graph.edges()[1]]
+
         # add the graph to the list
         graphs.append(graph)
 
