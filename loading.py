@@ -238,6 +238,18 @@ class RibonucleicAcidDataModule(BarebonesDataModule):
                 'The number of workers cannot exceed 1 for netCDF datasets.' \
                 ' Exactly one is preferable.'
                 )
+        
+    
+    def prepare_data(self) -> None:
+        """
+        Load the graphs from the specified directories.
+        """
+        for phase in ['train', 'validate', 'test']:
+            self.data[phase] = load_point_cloud_from_nc(
+                file=self.directories[phase], 
+                d_var='graph', 
+                threshold=self.threshold,
+                )
 
 
     def create_datasets(
@@ -250,17 +262,10 @@ class RibonucleicAcidDataModule(BarebonesDataModule):
         Create a dataset for the specified phase, if a path to the data is
         specified.
         """
-        if self.directories[phase] is not None:
-            # load the graphs from the directory
-            graphs = load_point_cloud_from_nc(
-                file=self.directories[phase], 
-                d_var='graph', 
-                threshold=self.threshold,
-                )
-
+        if self.data[phase] is not None:
             # construct the dataset
             return DeepGraphLibraryIterableDataset(
-                graphs=graphs, 
+                graphs=self.data[phase],
                 batch_size=self.batch_size,
                 rank=rank,
                 world_size=world_size,
