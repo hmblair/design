@@ -19,7 +19,7 @@ data:
   init_args:
     train_dir : data/rna-solo.nc
     validate_dir : data/rna-solo.nc
-    batch_size: 32
+    batch_size: 4
     threshold: 100
 
 trainer:
