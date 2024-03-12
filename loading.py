@@ -245,12 +245,13 @@ class RibonucleicAcidDataModule(BarebonesDataModule):
         Load the graphs from the specified directories.
         """
         for phase in ['train', 'validate', 'test']:
-            self.data[phase] = load_point_cloud_from_nc(
-                file=self.directories[phase], 
-                d_var='graph', 
-                threshold=self.threshold,
-                )
-
+            if self.directories[phase] is not None:
+                self.data[phase] = load_point_cloud_from_nc(
+                    file=self.directories[phase], 
+                    d_var='graph', 
+                    threshold=self.threshold,
+                    )
+                
 
     def create_datasets(
             self, 
