@@ -136,6 +136,70 @@ def load_graphs_from_pdb(dir : str, threshold : float):
     return graphs
 
 
+import dgl
+import torch
+import xarray as xr
+
+def load_point_cloud_from_nc(
+        file : str, 
+        d_var : str,
+        threshold : float, 
+        ) -> dgl.DGLGraph:
+    """
+    Load a point cloud from a netCDF file. If the data is batched, the batches
+    should be concatenated along the first dimension. The variable d_var is
+    the name of the variable in the netCDF file that identifies to which
+    point cloud each point belongs.
+
+    Parameters:
+    -----------
+    file : str
+        The path to the netCDF file.
+    d_var : str
+        The name of the variable in the netCDF file that identifies to which
+        point cloud each point belongs.
+
+    Returns:
+    --------
+    dgl.DGLGraph
+        A batch of graphs, where each graph represents a point cloud.
+    """
+
+    # load the data
+    data = xr.open_dataset(file)
+
+    # get the indices of the unique point clouds
+    which = data[d_var].values
+    ix = [which == i for i in range(which.max() + 1)]
+
+    # split the data based on the point cloud
+    data = [data.sel(atom=i) for i in ix]
+
+    # remove the point cloud variable
+    data = [d.drop(d_var) for d in data]
+
+    # construct the graphs
+    graphs = []
+    for d in data:
+        # get the coordinates
+        coordinates = d['coordinates'].values   
+
+        # convert the coordinates to a torch tensor
+        coordinates = torch.tensor(coordinates)
+
+        # construct the graph
+        graph = dgl.radius_graph(coordinates, threshold)
+
+        # add all the node features
+        for col in d.data_vars:
+            graph.ndata[col] = torch.tensor(d[col].values)
+
+        # add the graph to the list
+        graphs.append(graph)
+
+    return graphs
+
+
 
 class RibonucleicAcidDataModule(BarebonesDataModule):
     """
@@ -184,7 +248,11 @@ class RibonucleicAcidDataModule(BarebonesDataModule):
         """
         if self.directories[phase] is not None:
             # load the graphs from the directory
-            graphs = load_graphs_from_pdb(self.directories[phase], self.threshold)
+            graphs = load_point_cloud_from_nc(
+                file=self.directories[phase], 
+                d_var='atom', 
+                threshold=self.threshold,
+                )
 
             # construct the dataset
             return DeepGraphLibraryIterableDataset(
