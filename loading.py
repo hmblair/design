@@ -181,7 +181,7 @@ def load_point_cloud_from_nc(
 
     # construct the graphs
     graphs = []
-    for d in data:
+    for d in tqdm(data, desc='Loading and processing graphs'):
         # get the coordinates
         coordinates = d['coordinates'].values   
 
