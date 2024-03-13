@@ -263,7 +263,6 @@ class RibonucleicAcidDataModule(BarebonesDataModule):
         Create a dataset for the specified phase, if a path to the data is
         specified.
         """
-        print(phase, self.data[phase])
         if self.data[phase] is not None:
             # construct the dataset
             return DeepGraphLibraryIterableDataset(
@@ -293,6 +292,8 @@ class RibonucleicAcidDataModule(BarebonesDataModule):
             raise ValueError(
                 f'Unknown phase {phase}. Please specify one of "train", "val", "test", or "predict".'
                 )
+        
+        print(phase, self.data[phase])
 
         if self.data[phase] is not None:
             return DataLoader(
