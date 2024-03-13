@@ -232,6 +232,12 @@ class RibonucleicAcidDataModule(BarebonesDataModule):
             'test' : test_dir,
             }
         
+        self.graphs = {
+            'train' : None,
+            'validate' : None,
+            'test' : None,
+        }
+        
         # raise an error if the number of workers is greater than 1
         if self.num_workers > 1:
             raise ValueError(
@@ -246,7 +252,7 @@ class RibonucleicAcidDataModule(BarebonesDataModule):
         """
         for phase in ['train', 'validate', 'test']:
             if self.directories[phase] is not None:
-                self.data[phase] = load_point_cloud_from_nc(
+                self.graphs[phase] = load_point_cloud_from_nc(
                     file=self.directories[phase], 
                     d_var='graph', 
                     threshold=self.threshold,
@@ -263,10 +269,10 @@ class RibonucleicAcidDataModule(BarebonesDataModule):
         Create a dataset for the specified phase, if a path to the data is
         specified.
         """
-        if self.data[phase] is not None:
+        if self.graphs[phase] is not None:
             # construct the dataset
             return DeepGraphLibraryIterableDataset(
-                graphs=self.data[phase],
+                graphs=self.graphs[phase],
                 batch_size=self.batch_size,
                 rank=rank,
                 world_size=world_size,
