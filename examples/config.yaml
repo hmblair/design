@@ -22,9 +22,9 @@ data:
   class_path: lib.data.datamodules.netCDFDataModule
   init_args:
     train_paths : 
-      - data/processed
+      - data/train
     validate_paths : 
-      - data/processed
+      - data/val
     batch_size: 1
     input_variables:
       - sequence
