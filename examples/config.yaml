@@ -10,21 +10,31 @@ model:
         timestep_embedding_dim: 6
         num_timesteps: 1000
         hidden_size: 32
-        num_layers: 6
+        num_layers: 8
         num_heads: 8
-        num_atom_types: 5
+        num_atom_types: 4
+        k_nearest_neighbors: 25
+    objective:
+      class_path: loss.KabschLoss
+    diffused_variable: coordinate
 
 data:
-  class_path: loading.RibonucleicAcidDataModule
+  class_path: lib.data.datamodules.netCDFDataModule
   init_args:
-    train_dir : data/rna-solo.nc
-    validate_dir : data/rna-solo.nc
-    batch_size: 4
-    threshold: 100
+    train_paths : 
+      - data/processed
+    validate_paths : 
+      - data/processed
+    batch_size: 1
+    input_variables:
+      - sequence
+      - coordinate
+
 
 trainer:
   precision: 16-mixed
   gradient_clip_val: 1.0
+  accelerator: cpu
   max_epochs: 100
   logger:
     class_path: pytorch_lightning.loggers.WandbLogger
