@@ -47,6 +47,7 @@ class RibonucleicAcidSE3Transformer(nn.Module):
             atom_embedding_dim : int,
             timestep_embedding_dim : int,
             num_timesteps : int,
+            k_nearest_neighbors : int,
             hidden_size : int,
             num_layers : int,
             num_heads : int,
@@ -89,37 +90,28 @@ class RibonucleicAcidSE3Transformer(nn.Module):
         # construct the atom embedding layer
         self.atom_embedding = nn.Embedding(num_atom_types, atom_embedding_dim)
 
+        # store the number of nearest neighbors
+        self.k_nearest_neighbors = k_nearest_neighbors
 
-    def forward(self, graph : dgl.DGLGraph, t : int) -> torch.Tensor:
+
+    def forward(
+            self, 
+            sequence : torch.Tensor, 
+            coordinate : torch.Tensor, 
+            t : int,
+            ) -> torch.Tensor:
         """
-        Pass the atomic graph through the SE(3)-Transformer model, and update
-        the node features with the output of the model.
-
-        The graph must have the following node features:
-        - atoms : torch.Tensor
-            A tensor of shape (N, 1) representing the type of each atom.
-        - coordinates : torch.Tensor
-            A tensor of shape (N, 3) representing the coordinates of each atom.
-
-        Parameters:
-        -----------
-        graph : dgl.DGLGraph
-            The atomic graph.
-        t : int
-            The current timestep of the diffusion process.
-
-        Returns:
-        --------
-        dgl.DGLGraph
-            The atomic graph with updated node features.
+        Using the given coordinates, a geometric graph is constructed and passed
+        through the SE(3)-Transformer model. The updated coordinates are returned.
+        The timestep is used to condition the model for the reverse diffusion
+        process.
         """
-
-        # copy the graph
-        graph = graph.local_var()
+        # get the batch size
+        b, n, _ = coordinate.shape
 
         # get the atom embeddings
-        atom_types = graph.ndata['atoms'].unsqueeze(1)
-        atom_embeddings = self.atom_embedding(atom_types).permute(0, 2, 1)
+        sequence = sequence.reshape(-1, 1)
+        atom_embeddings = self.atom_embedding(sequence).permute(0, 2, 1)
 
         # get the timestep embeddings
         timestep_embeddings = self.timestep_embedding[t].unsqueeze(0).expand(atom_embeddings.shape[0], -1, -1).permute(0, 2, 1)
@@ -128,13 +120,17 @@ class RibonucleicAcidSE3Transformer(nn.Module):
         atom_embeddings = torch.cat([atom_embeddings, timestep_embeddings], dim=1)
 
         # centre the coordinates
-        atom_coordinates = graph.ndata['coordinates'].unsqueeze(1)
-        atom_coordinates -= atom_coordinates.mean(dim=0, keepdim=True)
+        coordinate -= coordinate.mean(dim=1, keepdim=True)
+        coordinate = coordinate
 
-        # pass the atom embeddings through the SE(3)-Transformer model
-        _, coordinates = self.model(graph, {'0': atom_embeddings, '1' : atom_coordinates}, {}).values()
+        # construct the graph
+        graph = dgl.knn_graph(coordinate, self.k_nearest_neighbors)
+        reshaped_coordinates = coordinate.view(-1, 3)
+        graph.edata['rel_pos'] = reshaped_coordinates[graph.edges()[0]] - reshaped_coordinates[graph.edges()[1]]
 
-        # update the node features
-        graph.ndata['coordinates'] = coordinates
+        # pass the graph through the SE(3)-Transformer model
+        atoms, coordinate = self.model(
+            graph, {'0' : atom_embeddings, '1' : reshaped_coordinates.unsqueeze(1)},
+        ).values()
 
-        return graph
+        return coordinate.squeeze(1).reshape(b, n, 3)
