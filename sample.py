@@ -1,8 +1,7 @@
 
 import torch
 import torch.nn as nn
-import pytorch_lightning as pl
-import matplotlib.pyplot as plt
+import xarray as xr
 
 from lib.training.modules import DenoisingDiffusionModule
 from model import RibonucleicAcidSE3Transformer
@@ -31,9 +30,10 @@ model.eval()
 state_dict = torch.load(ckpt, map_location=device)['state_dict']
 model.load_state_dict(state_dict)
 
-# generate a sample
-shape = (1, 50, 3)
-sequence = torch.randint(0, 4, (1, 50), dtype=torch.long, device=device)
+# get a sequence from the train dataset
+file = 'data/train/76.nc'
+sequence = xr.open_dataset(file)['sequence'].values[0]
+shape = (1,) + sequence.shape + (3,)
 
 out = model(shape, sequence=sequence)
 out = out.detach().cpu().numpy()
