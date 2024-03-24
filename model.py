@@ -4,7 +4,7 @@ import torch.nn as nn
 import dgl 
 from se3_transformer.model import SE3Transformer
 from se3_transformer.model.fiber import Fiber
-from lib.models.recurrent import RecurrentEncoder
+from lib.models.recurrent import RecurrentEncoderDecoderWithAttention
 
 def sinusoidal_embedding(seq_len : int, embedding_dim : int) -> torch.Tensor:
     """
@@ -92,11 +92,14 @@ class RibonucleicAcidSE3Transformer(nn.Module):
         )
 
         # construct the atom embedding layer
-        self.atom_embedding = RecurrentEncoder(
+        self.atom_embedding = RecurrentEncoderDecoderWithAttention(
             num_embeddings=num_atom_types,
             embedding_dim=atom_embedding_dim,
             hidden_size=atom_embedding_dim,
-            num_layers=atom_embedding_layers,
+            out_size=atom_embedding_dim,
+            num_encoder_layers=atom_embedding_layers,
+            num_decoder_layers=atom_embedding_layers,
+            num_heads=1,
         )
 
         # store the number of nearest neighbors
@@ -120,7 +123,7 @@ class RibonucleicAcidSE3Transformer(nn.Module):
 
         # get the atom embeddings
         sequence = sequence.reshape(-1, 1)
-        atom_embeddings, _ = self.atom_embedding(sequence)
+        atom_embeddings = self.atom_embedding(sequence)
         atom_embeddings = atom_embeddings.permute(0, 2, 1)
 
         # get the timestep embeddings
