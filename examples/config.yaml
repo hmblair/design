@@ -9,7 +9,6 @@ model:
         atom_embedding_dim: 26
         timestep_embedding_dim: 6
         num_timesteps: 1000
-        hidden_size: 32
         num_layers: 8
         num_heads: 8
         num_atom_types: 4
@@ -34,7 +33,6 @@ data:
 trainer:
   precision: 16-mixed
   gradient_clip_val: 1.0
-  accelerator: cpu
   max_epochs: 100
   logger:
     class_path: pytorch_lightning.loggers.WandbLogger

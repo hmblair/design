@@ -48,12 +48,14 @@ class RibonucleicAcidSE3Transformer(nn.Module):
             timestep_embedding_dim : int,
             num_timesteps : int,
             k_nearest_neighbors : int,
-            hidden_size : int,
             num_layers : int,
             num_heads : int,
             num_atom_types : int,
             ) -> None:
         super().__init__()
+
+        # calculate the hidden size
+        hidden_size = atom_embedding_dim + timestep_embedding_dim
 
         # ensure that the hidden size is divisible by the number of heads
         if not hidden_size % num_heads == 0:
