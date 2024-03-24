@@ -11,14 +11,14 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 model = DenoisingDiffusionModule(
     model=RibonucleicAcidSE3Transformer(
-        atom_embedding_dim=12,
-        atom_embedding_layers=2,
-        timestep_embedding_dim=4,
+        atom_embedding_dim=36,
+        atom_embedding_layers=4,
+        timestep_embedding_dim=12,
         num_timesteps=1000,
-        num_layers=6,
+        num_layers=8,
         num_heads=8,
         num_atom_types=4,
-        k_nearest_neighbors=25,
+        k_nearest_neighbors=75,
     ),
     objective=nn.MSELoss(),
     diffused_variable='coordinate',
