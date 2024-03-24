@@ -6,14 +6,14 @@ model:
     model:
       class_path: model.RibonucleicAcidSE3Transformer
       init_args:
-        atom_embedding_dim: 12
-        atom_embedding_layers: 2
-        timestep_embedding_dim: 4
+        atom_embedding_dim: 36
+        atom_embedding_layers: 4
+        timestep_embedding_dim: 12
         num_timesteps: 1000
-        num_layers: 6
+        num_layers: 8
         num_heads: 8
         num_atom_types: 4
-        k_nearest_neighbors: 25
+        k_nearest_neighbors: 75
     objective:
       class_path: loss.KabschLoss
     diffused_variable: coordinate
@@ -21,9 +21,9 @@ model:
 data:
   class_path: lib.data.datamodules.netCDFDataModule
   init_args:
-    train_paths : 
+    train_paths: 
       - data/train
-    validate_paths : 
+    validate_paths: 
       - data/val
     batch_size: 1
     input_variables:
