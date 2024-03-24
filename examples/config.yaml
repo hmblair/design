@@ -32,7 +32,7 @@ data:
 
 trainer:
   gradient_clip_val: 1.0
-  max_epochs: 100
+  max_epochs: 50
   devices: 1
   logger:
     class_path: pytorch_lightning.loggers.WandbLogger
@@ -47,12 +47,7 @@ trainer:
         save_top_k: 1
         save_last: true
         dirpath: ./checkpoints/
-    - class_path: pytorch_lightning.callbacks.EarlyStopping
-      init_args:
-        monitor: val_loss
-        patience: 10
-        mode: min
-        verbose: true
+
 
 optimizer:
   class_path: torch.optim.AdamW
