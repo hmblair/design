@@ -4,6 +4,7 @@ import torch.nn as nn
 import dgl 
 from se3_transformer.model import SE3Transformer
 from se3_transformer.model.fiber import Fiber
+from lib.models.recurrent import RecurrentEncoder
 
 def sinusoidal_embedding(seq_len : int, embedding_dim : int) -> torch.Tensor:
     """
@@ -45,6 +46,7 @@ class RibonucleicAcidSE3Transformer(nn.Module):
     def __init__(
             self, 
             atom_embedding_dim : int,
+            atom_embedding_layers : int, 
             timestep_embedding_dim : int,
             num_timesteps : int,
             k_nearest_neighbors : int,
@@ -90,7 +92,12 @@ class RibonucleicAcidSE3Transformer(nn.Module):
         )
 
         # construct the atom embedding layer
-        self.atom_embedding = nn.Embedding(num_atom_types, atom_embedding_dim)
+        self.atom_embedding = RecurrentEncoder(
+            num_embeddings=num_atom_types,
+            embedding_dim=atom_embedding_dim,
+            hidden_size=atom_embedding_dim,
+            num_layers=atom_embedding_layers,
+        )
 
         # store the number of nearest neighbors
         self.k_nearest_neighbors = k_nearest_neighbors
@@ -113,7 +120,8 @@ class RibonucleicAcidSE3Transformer(nn.Module):
 
         # get the atom embeddings
         sequence = sequence.reshape(-1, 1)
-        atom_embeddings = self.atom_embedding(sequence).permute(0, 2, 1)
+        atom_embeddings, _ = self.atom_embedding(sequence)
+        atom_embeddings = atom_embeddings.permute(0, 2, 1)
 
         # get the timestep embeddings
         timestep_embeddings = self.timestep_embedding[t].unsqueeze(0).expand(atom_embeddings.shape[0], -1, -1).permute(0, 2, 1)

@@ -7,6 +7,7 @@ model:
       class_path: model.RibonucleicAcidSE3Transformer
       init_args:
         atom_embedding_dim: 12
+        atom_embedding_layers: 2
         timestep_embedding_dim: 4
         num_timesteps: 1000
         num_layers: 6
