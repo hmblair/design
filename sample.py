@@ -13,6 +13,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 model = DenoisingDiffusionModule(
     model=RibonucleicAcidSE3Transformer(
         atom_embedding_dim=12,
+        atom_embedding_layers=2,
         timestep_embedding_dim=4,
         num_timesteps=1000,
         num_layers=6,
