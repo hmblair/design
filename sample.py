@@ -35,7 +35,7 @@ shape = (1, 50, 3)
 sequence = torch.randint(0, 4, (1, 50), dtype=torch.long, device=device)
 
 out = model(shape, sequence=sequence)
-out = out.detach().numpy()
+out = out.detach().cpu().numpy()
 
 # save the output to an xarray dataset
 import xarray as xr
