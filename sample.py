@@ -41,7 +41,7 @@ out = out.detach().cpu().numpy()
 import xarray as xr
 data = xr.Dataset(
     {
-        'coordinate' : (['residue', 'xyz'], out),
+        'coordinate' : (['residue', 'xyz'], out.squeeze(0)),
         'sequence' : (['residue'], sequence.squeeze().cpu().numpy())
     },
 )
