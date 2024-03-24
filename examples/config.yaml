@@ -33,6 +33,7 @@ data:
 trainer:
   gradient_clip_val: 1.0
   max_epochs: 100
+  devices: 1
   logger:
     class_path: pytorch_lightning.loggers.WandbLogger
     init_args:
