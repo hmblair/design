@@ -32,7 +32,7 @@ model.load_state_dict(state_dict)
 
 # generate a sample
 shape = (1, 50, 3)
-sequence = torch.randint(0, 4, (1, 50))
+sequence = torch.randint(0, 4, (1, 50), dtype=torch.long, device=device)
 
 out = model(shape, sequence=sequence)
 out = out.detach().numpy()
