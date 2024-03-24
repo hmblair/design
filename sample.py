@@ -45,3 +45,4 @@ data = xr.Dataset(
         'sequence' : (['residue'], sequence.squeeze().cpu().numpy())
     },
 )
+data.to_netcdf('sample.nc')
