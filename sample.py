@@ -42,6 +42,6 @@ import xarray as xr
 data = xr.Dataset(
     {
         'coordinate' : (['residue', 'xyz'], out),
-        'sequence' : (['residue'], sequence.squeeze().numpy())
+        'sequence' : (['residue'], sequence.squeeze().cpu().numpy())
     },
 )
