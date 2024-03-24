@@ -35,6 +35,9 @@ file = 'data/train/76.nc'
 sequence = xr.open_dataset(file)['sequence'].values[0]
 shape = (1,) + sequence.shape + (3,)
 
+# convert the sequence to a tensor, add a batch dimension, and move to the device
+sequence = torch.tensor(sequence).unsqueeze(0).to(device)
+
 out = model(shape, sequence=sequence)
 out = out.detach().cpu().numpy()
 
