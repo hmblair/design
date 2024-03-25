@@ -55,7 +55,8 @@ trainer:
         variable_name: reads
         dimension_names: 
           - batch
-          - experiment_type
+          - residue
+          - xyz
         write_interval: batch
 
 optimizer:
