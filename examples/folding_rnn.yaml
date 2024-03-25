@@ -7,11 +7,11 @@ model:
       class_path: lib.models.recurrent.RecurrentEncoderDecoderWithAttention
       init_args:
         num_embeddings: 4
-        embedding_dim: 32
-        hidden_size: 32
+        embedding_dim: 128
+        hidden_size: 128
         out_size: 3
-        num_encoder_layers: 4
-        num_decoder_layers: 4
+        num_encoder_layers: 6
+        num_decoder_layers: 6
         num_heads: 8
     objectives:
       loss:
