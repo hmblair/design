@@ -52,7 +52,7 @@ trainer:
     - class_path: lib.data.writing.netCDFDistributedPredictionWriter
       init_args:
         path: data/predictions
-        variable_name: reads
+        variable_name: coordinates
         dimension_names: 
           - batch
           - residue
