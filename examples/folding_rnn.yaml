@@ -25,6 +25,7 @@ data:
     validate_paths: 
       - data/val
     predict_paths:
+      - data/train
       - data/val
     batch_size: 4
     input_variables:
