@@ -49,6 +49,14 @@ trainer:
         save_top_k: 1
         save_last: true
         dirpath: ./checkpoints/
+    - class_path: lib.data.writing.netCDFDistributedPredictionWriter
+      init_args:
+        path: data/predictions
+        variable_name: reads
+        dimension_names: 
+          - batch
+          - experiment_type
+        write_interval: batch
 
 optimizer:
   class_path: torch.optim.AdamW
