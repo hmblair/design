@@ -1,0 +1,56 @@
+# folding_rnn.yaml
+
+model:
+  class_path: lib.training.modules.PipelineModule
+  init_args:
+    model:
+      class_path: lib.models.recurrent.RecurrentEncoderDecoderWithAttention
+      init_args:
+        num_embeddings: 4
+        embedding_dim: 32
+        hidden_size: 32
+        out_size: 3
+        num_encoder_layers: 4
+        num_decoder_layers: 4
+        num_heads: 8
+    objectives:
+      loss:
+        class_path: loss.KabschLoss
+
+data:
+  class_path: lib.data.datamodules.netCDFDataModule
+  init_args:
+    train_paths: 
+      - data/train
+    validate_paths: 
+      - data/val
+    predict_paths:
+      - data/val
+    batch_size: 4
+    input_variables:
+      - [sequence, x]
+    target_variables:
+      - [coordinate, y]
+
+trainer:
+  gradient_clip_val: 1.0
+  max_epochs: 25
+  devices: 1
+  logger:
+    class_path: pytorch_lightning.loggers.WandbLogger
+    init_args:
+      save_dir: ./logs/
+      log_model: all
+  callbacks:
+    - class_path: pytorch_lightning.callbacks.ModelCheckpoint
+      init_args:
+        filename: best_model
+        mode: min
+        save_top_k: 1
+        save_last: true
+        dirpath: ./checkpoints/
+
+optimizer:
+  class_path: torch.optim.AdamW
+  init_args:
+    lr: 0.001
