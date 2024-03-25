@@ -72,7 +72,7 @@ class KabschLoss(nn.Module):
             between the two point clouds.
         """
 
-        # align the point clouds
+        # align the point clouds using the Kabsch algorithm
         x, y = kabsch_align(x, y)
 
         # calculate the mean square deviation
