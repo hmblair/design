@@ -7,11 +7,11 @@ model:
       class_path: lib.models.recurrent.RecurrentEncoderDecoderWithAttention
       init_args:
         num_embeddings: 4
-        embedding_dim: 128
-        hidden_size: 128
+        embedding_dim: 256
+        hidden_size: 256
         out_size: 3
-        num_encoder_layers: 6
-        num_decoder_layers: 6
+        num_encoder_layers: 8
+        num_decoder_layers: 8
         num_heads: 8
     objectives:
       loss:
@@ -37,7 +37,8 @@ data:
 
 trainer:
   gradient_clip_val: 1.0
-  max_epochs: 25
+  max_epochs: 50
+  accumulate_grad_batches: 16
   devices: 1
   logger:
     class_path: pytorch_lightning.loggers.WandbLogger
@@ -65,4 +66,4 @@ trainer:
 optimizer:
   class_path: torch.optim.AdamW
   init_args:
-    lr: 0.001
+    lr: 0.0005
