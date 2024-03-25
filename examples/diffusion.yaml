@@ -1,4 +1,4 @@
-# config.yaml
+# diffusion.yaml
 
 model:
   class_path: lib.training.modules.DenoisingDiffusionModule
