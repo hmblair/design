@@ -6,13 +6,14 @@ model:
     model:
       class_path: lib.models.recurrent.RecurrentEncoderDecoderWithAttention
       init_args:
-        num_embeddings: 4
-        embedding_dim: 256
-        hidden_size: 256
+        num_embeddings: 8
+        embedding_dim: 128
+        hidden_size: 128
         out_size: 3
-        num_encoder_layers: 8
-        num_decoder_layers: 8
+        num_encoder_layers: 6
+        num_decoder_layers: 6
         num_heads: 8
+        num_concat_dims: 2
     objectives:
       loss:
         class_path: loss.KabschLoss
@@ -22,7 +23,6 @@ data:
   init_args:
     paths:
       train:
-        - data/val
         - data/train
       validate:
         - data/val
@@ -31,9 +31,9 @@ data:
         - data/val
     batch_size: 4
     input_variables:
-      - [sequence, x]
+      - [sequencechain, x]
     target_variables:
-      - [coordinate, y]
+      - [coordinates, y]
 
 trainer:
   gradient_clip_val: 1.0
