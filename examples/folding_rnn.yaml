@@ -20,13 +20,15 @@ model:
 data:
   class_path: lib.data.datamodules.netCDFDataModule
   init_args:
-    train_paths: 
-      - data/train
-    validate_paths: 
-      - data/val
-    predict_paths:
-      - data/train
-      - data/val
+    paths:
+      train:
+        - data/val
+        - data/train
+      validate:
+        - data/val
+      predict:
+        - data/train
+        - data/val
     batch_size: 4
     input_variables:
       - [sequence, x]
